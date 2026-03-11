@@ -147,7 +147,7 @@ placeholder="Search products..."
 <button
   onClick={() => {
     localStorage.clear();
-    navigate("/");
+    navigate("/login");
   }}
   style={{
     padding: "10px 15px",

@@ -3,153 +3,230 @@ import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
   const [isRegister, setIsRegister] = useState(false);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
   });
 
-  const navigate = useNavigate();
-
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const toggleForm = () => {
-    setIsRegister(!isRegister);
+    setIsRegister((prev) => !prev);
     setMessage("");
     setFormData({
       name: "",
       email: "",
-      password: ""
+      password: "",
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setLoading(true);
 
-    const url = isRegister
-      ? "https://amazon-backend-glih.onrender.com/register"
-      : "https://amazon-backend-glih.onrender.com/login";
+  const url = isRegister
+  ? "http://localhost:5000/register"
+  : "http://localhost:5000/login";
+
+    const payload = isRegister
+      ? {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }
+      : {
+          email: formData.email,
+          password: formData.password,
+        };
 
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        if (isRegister) {
-          setMessage("Registration successful. Please login.");
+        setMessage(data.message || (isRegister ? "Registered successfully" : "Login successful"));
+
+        if (!isRegister) {
+          localStorage.setItem("user", JSON.stringify(data.user || { email: formData.email }));
+          navigate("/");
+        } else {
           setIsRegister(false);
           setFormData({
             name: "",
             email: "",
-            password: ""
+            password: "",
           });
-        } else {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
-          navigate("/home");
         }
       } else {
-        setMessage(data.message || "Request failed");
+        setMessage(data.message || "Something went wrong");
       }
     } catch (error) {
-      setMessage("Backend not connected");
+      setMessage("Server error. Check backend or CORS.");
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="login-page">
-      <div className="login-left-shape"></div>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #dbeafe, #fef3c7)",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "400px",
+          background: "#fff",
+          padding: "30px",
+          borderRadius: "12px",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            marginBottom: "20px",
+            color: "#1f2937",
+          }}
+        >
+          {isRegister ? "Register" : "Login"}
+        </h2>
 
-      <div className="login-card">
-        <h2>{isRegister ? "Sign Up" : "Login In"}</h2>
-
-        <form onSubmit={handleSubmit} autoComplete="off">
-            <input
-    type="text"
-    name="fakeuser"
-    autoComplete="username"
-    style={{ display: "none" }}
-  />
-
-  <input
-    type="password"
-    name="fakepass"
-    style={{ display: "none" }}
-  />
+        <form onSubmit={handleSubmit}>
           {isRegister && (
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter your name"
-              value={formData.name}
-              onChange={handleChange}
-              className="login-input"
-            />
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", marginBottom: "6px" }}>Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required={isRegister}
+                placeholder="Enter your name"
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                }}
+              />
+            </div>
           )}
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email address"
-            value={formData.email}
-            onChange={handleChange}
-            className="login-input"
-          />
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "6px" }}>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="Enter your email"
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
 
-          <div className="password-box">
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "6px" }}>Password</label>
             <input
               type="password"
               name="password"
-              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="login-input password-input"
+              required
+              placeholder="Enter your password"
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+              }}
             />
-            <span className="eye-icon">👁</span>
           </div>
 
-          {!isRegister && <p className="forgot-text">Forgot password</p>}
-
-          <button type="submit" className="login-btn">
-            {isRegister ? "Sign Up" : "Log in"}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: loading ? "#9ca3af" : "#2563eb",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "16px",
+              fontWeight: "bold",
+            }}
+          >
+            {loading ? "Please wait..." : isRegister ? "Register" : "Login"}
           </button>
         </form>
 
-        <p className="switch-text">
-          {isRegister ? "Already have an account?" : "New user?"}{" "}
-          <span onClick={toggleForm}>
-            {isRegister ? "Login" : "Sign up"}
+        {message && (
+          <p
+            style={{
+              marginTop: "15px",
+              textAlign: "center",
+              color: message.toLowerCase().includes("success") ? "green" : "red",
+            }}
+          >
+            {message}
+          </p>
+        )}
+
+        <p
+          style={{
+            marginTop: "20px",
+            textAlign: "center",
+            color: "#374151",
+          }}
+        >
+          {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
+          <span
+            onClick={toggleForm}
+            style={{
+              color: "#2563eb",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            {isRegister ? "Login" : "Register"}
           </span>
         </p>
-
-        {message && <p className="message-text">{message}</p>}
-
-        <div className="social-icons">
-          <span>G</span>
-        </div>
       </div>
-
-      <div className="illustration-side">
-  <img
-    src="/login-illustration.png"
-    alt="Shopping Illustration"
-    className="illustration-image"
-  />
-</div>
     </div>
   );
 };

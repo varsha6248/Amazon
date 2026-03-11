@@ -8,20 +8,19 @@ import Checkout from "./Checkout";
 import CartPage from "./CartPage";
 import Payment from "./Payment";
 import Orders from "./Orders";
-
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/" />;
+  return token ? children : <Navigate to="/login" />;
 }
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
-
+                
+    <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/home"
+          path="/"
           element={
             <ProtectedRoute>
               <HomePage />
