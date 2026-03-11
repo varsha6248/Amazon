@@ -34,8 +34,8 @@ const LoginPage = () => {
     e.preventDefault();
 
     const url = isRegister
-      ? "http://localhost:5000/register"
-      : "http://localhost:5000/login";
+      ? "https://amazon-backend-glih.onrender.com/register"
+      : "https://amazon-backend-glih.onrender.com/login";
 
     try {
       const response = await fetch(url, {
