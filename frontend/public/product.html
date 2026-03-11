@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Details</title>
+  <style>
+    body { font-family: Arial; padding: 30px; }
+    img { width: 300px; }
+    button { padding: 10px 20px; margin-right: 10px; cursor: pointer; }
+    input { padding: 5px; width: 80px; }
+  </style>
+</head>
+<body>
+
+  <h1 id="title"></h1>
+  <img id="image" />
+  <p id="desc"></p>
+  <h2>Price: ₹<span id="price"></span></h2>
+
+  <h3>Bargain Price</h3>
+  <input type="number" id="bargainInput" />
+  <button onclick="addToCart()">Add to Cart</button>
+  <button onclick="buyNow()">Buy Now</button>
+
+  <p id="msg" style="color:red;"></p>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const price = Number(params.get("price"));
+
+  document.getElementById("title").innerText = params.get("title");
+  document.getElementById("desc").innerText = params.get("desc");
+  document.getElementById("image").src = params.get("src");
+  document.getElementById("price").innerText = price;
+
+  function addToCart() {
+    const bargain = Number(document.getElementById("bargainInput").value);
+
+    if (bargain < price - 100 || bargain > price) {
+      document.getElementById("msg").innerText =
+        "Bargain allowed only up to ₹100 less than original price";
+      return;
+    }
+
+    localStorage.setItem("cartPrice", bargain || price);
+    alert("Added to cart successfully");
+  }
+
+  function buyNow() {
+    window.location.href = `/checkout.html?price=${price}`;
+  }
+</script>
+
+</body>
+</html>
