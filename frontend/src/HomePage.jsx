@@ -7,6 +7,7 @@ const HomePage = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [products, setProducts] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     fetch("https://amazon-backend-uy18.onrender.com/api/products")
@@ -17,7 +18,11 @@ const HomePage = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setMenuOpen(false);
+      }
     };
 
     window.addEventListener("resize", handleResize);
@@ -72,126 +77,286 @@ const HomePage = () => {
     }
   };
 
+  const menuItemStyle = {
+    padding: "10px 12px",
+    cursor: "pointer",
+    borderBottom: "1px solid #e5e7eb",
+    color: "#111827",
+    background: "white",
+  };
+
   return (
     <div>
       {/* NAVBAR */}
       <div
         style={{
           display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          justifyContent: "space-between",
-          alignItems: "center",
+          flexDirection: "column",
           padding: isMobile ? "15px" : "15px 30px",
           background: "#1f2937",
           color: "white",
-          gap: isMobile ? "12px" : "0",
+          gap: "12px",
         }}
       >
-        <h2 style={{ color: "#10b981", margin: 0 }}>OnlineStore</h2>
-
-        {/* SEARCH */}
         <div
           style={{
-            position: "relative",
             display: "flex",
-            width: isMobile ? "100%" : "auto",
-            maxWidth: isMobile ? "100%" : "none",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "15px",
+            flexWrap: isMobile ? "wrap" : "nowrap",
           }}
         >
-          <input
-            placeholder="Search products..."
-            value={query}
-            onChange={handleSearch}
-            onKeyDown={handleKeyDown}
-            style={{
-              padding: "10px",
-              width: isMobile ? "100%" : "400px",
-              border: "none",
-              outline: "none",
-              background: "#f3f4f6",
-              fontSize: isMobile ? "14px" : "16px",
-            }}
-          />
-          <button
-            onClick={handleSearchSubmit}
-            style={{
-              padding: "10px 15px",
-              border: "none",
-              background: "#10b981",
-              color: "white",
-              cursor: "pointer",
-            }}
-          >
-            🔍
-          </button>
+          <h2 style={{ color: "#10b981", margin: 0 }}>OnlineStore</h2>
 
-          {suggestions.length > 0 && (
-            <div
-              style={{
-                position: "absolute",
-                top: "42px",
-                width: isMobile ? "100%" : "300px",
-                background: "white",
-                border: "1px solid #ccc",
-                zIndex: 10,
-              }}
-            >
-              {suggestions.map((product) => (
-                <div
-                  key={product.id}
+          {!isMobile && (
+            <>
+              <div style={{ position: "relative", display: "flex" }}>
+                <input
+                  placeholder="Search products..."
+                  value={query}
+                  onChange={handleSearch}
+                  onKeyDown={handleKeyDown}
                   style={{
-                    padding: "8px",
-                    cursor: "pointer",
-                    color: "black",
+                    padding: "10px",
+                    width: "400px",
+                    border: "none",
+                    outline: "none",
+                    background: "#f3f4f6",
                   }}
-                  onClick={() => handleSelect(product)}
+                />
+                <button
+                  onClick={handleSearchSubmit}
+                  style={{
+                    padding: "10px 15px",
+                    border: "none",
+                    background: "#10b981",
+                    color: "white",
+                    cursor: "pointer",
+                  }}
                 >
-                  {product.title}
-                </div>
-              ))}
-            </div>
+                  🔍
+                </button>
+
+                {suggestions.length > 0 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "42px",
+                      width: "300px",
+                      background: "white",
+                      border: "1px solid #ccc",
+                      zIndex: 10,
+                    }}
+                  >
+                    {suggestions.map((product) => (
+                      <div
+                        key={product.id}
+                        style={{
+                          padding: "8px",
+                          cursor: "pointer",
+                          color: "black",
+                        }}
+                        onClick={() => handleSelect(product)}
+                      >
+                        {product.title}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ cursor: "pointer" }} onClick={() => navigate("/cart")}>
+                🛒 Cart
+              </div>
+
+              <div style={{ cursor: "pointer" }} onClick={() => navigate("/orders")}>
+                📦 Orders
+              </div>
+
+              <div style={{ cursor: "pointer" }} onClick={() => navigate("/payment")}>
+                💳 Payment
+              </div>
+
+              <button
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("user");
+                  navigate("/login");
+                }}
+                style={{
+                  padding: "10px 15px",
+                  background: "red",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  borderRadius: "5px",
+                }}
+              >
+                Logout
+              </button>
+            </>
           )}
         </div>
 
-        <div
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/cart")}
-        >
-          🛒 Cart
-        </div>
+        {isMobile && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              <input
+                placeholder="Search products..."
+                value={query}
+                onChange={handleSearch}
+                onKeyDown={handleKeyDown}
+                style={{
+                  padding: "10px",
+                  width: "100%",
+                  border: "none",
+                  outline: "none",
+                  background: "#f3f4f6",
+                  fontSize: "14px",
+                }}
+              />
+              <button
+                onClick={handleSearchSubmit}
+                style={{
+                  padding: "10px 15px",
+                  border: "none",
+                  background: "#10b981",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                🔍
+              </button>
 
-        <div
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/orders")}
-        >
-          📦 Orders
-        </div>
+              {suggestions.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "42px",
+                    left: 0,
+                    width: "100%",
+                    background: "white",
+                    border: "1px solid #ccc",
+                    zIndex: 20,
+                  }}
+                >
+                  {suggestions.map((product) => (
+                    <div
+                      key={product.id}
+                      style={{
+                        padding: "8px",
+                        cursor: "pointer",
+                        color: "black",
+                      }}
+                      onClick={() => handleSelect(product)}
+                    >
+                      {product.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-        <div
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/payment")}
-        >
-          💳 Payment
-        </div>
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  border: "none",
+                  borderRadius: "6px",
+                  background: "#10b981",
+                  color: "white",
+                  cursor: "pointer",
+                  fontSize: "22px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                ☰
+              </button>
 
-        <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            navigate("/login");
-          }}
-          style={{
-            padding: "10px 15px",
-            background: "red",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-            borderRadius: "5px",
-            width: isMobile ? "100%" : "auto",
-          }}
-        >
-          Logout
-        </button>
+              {menuOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: "50px",
+                    width: "180px",
+                    background: "white",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+                    zIndex: 30,
+                  }}
+                >
+                  <div
+                    style={menuItemStyle}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/cart");
+                    }}
+                  >
+                    🛒 Cart
+                  </div>
+
+                  <div
+                    style={menuItemStyle}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/orders");
+                    }}
+                  >
+                    📦 Orders
+                  </div>
+
+                  <div
+                    style={menuItemStyle}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/payment");
+                    }}
+                  >
+                    💳 Payment
+                  </div>
+
+                  <div
+                    style={{
+                      ...menuItemStyle,
+                      borderBottom: "none",
+                      color: "red",
+                      fontWeight: "bold",
+                    }}
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      localStorage.removeItem("user");
+                      setMenuOpen(false);
+                      navigate("/login");
+                    }}
+                  >
+                    Logout
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* FRONT IMAGE */}
