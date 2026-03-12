@@ -16,14 +16,23 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log("MongoDB error:", err));
+  .catch((err) => console.error("MongoDB connection error:", err.message));
 
 app.use("/api", ProductRoutes);
+
 app.get("/", (req, res) => {
   res.send("Backend is running");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    message: "Server is healthy",
+    mongoState: mongoose.connection.readyState,
+  });
 });
 
 app.post("/register", async (req, res) => {
@@ -52,7 +61,7 @@ app.post("/register", async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Registered successfully",
       user: {
         name: newUser.name,
@@ -61,10 +70,9 @@ app.post("/register", async (req, res) => {
     });
   } catch (error) {
     console.error("REGISTER ERROR:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
       error: error.message,
-      stack: error.stack,
     });
   }
 });
@@ -76,23 +84,31 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
     }
 
     if (!user.password) {
-      return res.status(500).json({ message: "Stored password is missing" });
+      return res.status(500).json({
+        message: "Stored password is missing",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
     }
 
     const token = jwt.sign(
@@ -101,7 +117,7 @@ app.post("/login", async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       token,
       user: {
@@ -111,10 +127,9 @@ app.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("LOGIN ERROR:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
       error: error.message,
-      stack: error.stack,
     });
   }
 });
@@ -122,9 +137,10 @@ app.post("/login", async (req, res) => {
 app.get("/users", async (req, res) => {
   try {
     const users = await User.find();
-    res.json(users);
+    return res.json(users);
   } catch (error) {
-    res.status(500).json({
+    console.error("GET USERS ERROR:", error);
+    return res.status(500).json({
       message: "Server error",
       error: error.message,
     });
@@ -134,9 +150,10 @@ app.get("/users", async (req, res) => {
 app.delete("/users", async (req, res) => {
   try {
     await User.deleteMany({});
-    res.json({ message: "All users deleted successfully" });
+    return res.json({ message: "All users deleted successfully" });
   } catch (error) {
-    res.status(500).json({
+    console.error("DELETE USERS ERROR:", error);
+    return res.status(500).json({
       message: "Server error",
       error: error.message,
     });
@@ -147,7 +164,13 @@ app.post("/orders", async (req, res) => {
   try {
     const { userEmail, items, totalAmount } = req.body;
 
-    if (!userEmail || !items || items.length === 0 || !totalAmount) {
+    if (
+      !userEmail ||
+      !items ||
+      !Array.isArray(items) ||
+      items.length === 0 ||
+      totalAmount == null
+    ) {
       return res.status(400).json({ message: "Missing order details" });
     }
 
@@ -159,16 +182,15 @@ app.post("/orders", async (req, res) => {
 
     await newOrder.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Order placed successfully",
       order: newOrder,
     });
   } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    res.status(500).json({
+    console.error("ORDER CREATE ERROR:", error);
+    return res.status(500).json({
       message: "Server error",
       error: error.message,
-      stack: error.stack,
     });
   }
 });
@@ -178,13 +200,13 @@ app.get("/orders/:email", async (req, res) => {
     const orders = await Order.find({ userEmail: req.params.email }).sort({
       createdAt: -1,
     });
-    res.json(orders);
+
+    return res.json(orders);
   } catch (error) {
     console.error("GET ORDERS ERROR:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
       error: error.message,
-      stack: error.stack,
     });
   }
 });
