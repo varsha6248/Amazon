@@ -37,8 +37,8 @@ const handleSubmit = async (e) => {
   setLoading(true);
 
   const url = isRegister
-? "https://amazon-backend-uy18.onrender.com/register"
-  : "https://amazon-backend-uy18.onrender.com/login";
+    ? "https://amazon-backend-uy18.onrender.com/register"
+    : "https://amazon-backend-uy18.onrender.com/login";
 
   const payload = isRegister
     ? {
@@ -52,6 +52,9 @@ const handleSubmit = async (e) => {
       };
 
   try {
+    console.log("Sending request to:", url);
+    console.log("Payload:", payload);
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -60,7 +63,10 @@ const handleSubmit = async (e) => {
       body: JSON.stringify(payload),
     });
 
+    console.log("Response status:", response.status);
+
     const data = await response.json();
+    console.log("Response data:", data);
 
     if (response.ok) {
       setMessage(
@@ -86,9 +92,10 @@ const handleSubmit = async (e) => {
       setMessage(data.message || "Something went wrong");
     }
   } catch (error) {
+    console.error("Login/Register error:", error);
     setMessage("Server error. Check backend or CORS.");
-    console.error("Error:", error);
   } finally {
+    console.log("Request finished");
     setLoading(false);
   }
 };
