@@ -12,7 +12,7 @@ const ProductPage = () => {
 
   // Fetch product from backend
   useEffect(() => {
-    fetch(`http://localhost:5000/api/products/${id}`)
+    fetch(`https://amazon-backend-uy18.onrender.com/api/products/${id}`)
       .then((res) => res.json())
       .then((data) => setProduct(data))
       .catch((err) => console.log(err));

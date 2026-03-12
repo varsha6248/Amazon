@@ -8,7 +8,7 @@ const HomePage = () => {
   const [suggestions, setSuggestions] = useState([]);
  const [products, setProducts] = useState([]);
   useEffect(() => {
-    fetch("http://localhost:5000/api/products")
+    fetch("https://amazon-backend-uy18.onrender.com/api/products")
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.log("Product fetch error:", err));

@@ -37,8 +37,8 @@ const handleSubmit = async (e) => {
   setLoading(true);
 
   const url = isRegister
-    ? "http://localhost:5000/register"
-    : "http://localhost:5000/login";
+? "https://amazon-backend-uy18.onrender.com/register"
+  : "https://amazon-backend-uy18.onrender.com/login";
 
   const payload = isRegister
     ? {
