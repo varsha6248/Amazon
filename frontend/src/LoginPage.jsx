@@ -31,62 +31,68 @@ const LoginPage = () => {
       password: "",
     });
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setMessage("");
+  setLoading(true);
 
   const url = isRegister
-  ? "http://localhost:5000/register"
-  : "http://localhost:5000/login";
+    ? "http://localhost:5000/register"
+    : "http://localhost:5000/login";
 
-    const payload = isRegister
-      ? {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }
-      : {
-          email: formData.email,
-          password: formData.password,
-        };
-
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage(data.message || (isRegister ? "Registered successfully" : "Login successful"));
-
-        if (!isRegister) {
-          localStorage.setItem("user", JSON.stringify(data.user || { email: formData.email }));
-          navigate("/");
-        } else {
-          setIsRegister(false);
-          setFormData({
-            name: "",
-            email: "",
-            password: "",
-          });
-        }
-      } else {
-        setMessage(data.message || "Something went wrong");
+  const payload = isRegister
+    ? {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
       }
-    } catch (error) {
-      setMessage("Server error. Check backend or CORS.");
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
+    : {
+        email: formData.email,
+        password: formData.password,
+      };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setMessage(
+        data.message || (isRegister ? "Registered successfully" : "Login successful")
+      );
+
+      if (!isRegister) {
+        localStorage.setItem("token", data.token || "loggedin");
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user || { email: formData.email })
+        );
+        navigate("/home");
+      } else {
+        setIsRegister(false);
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+        });
+      }
+    } else {
+      setMessage(data.message || "Something went wrong");
     }
-  };
+  } catch (error) {
+    setMessage("Server error. Check backend or CORS.");
+    console.error("Error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div

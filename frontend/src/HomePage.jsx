@@ -8,7 +8,7 @@ const HomePage = () => {
   const [suggestions, setSuggestions] = useState([]);
  const [products, setProducts] = useState([]);
   useEffect(() => {
-    fetch("https://amazon-backend-glih.onrender.com/api/products")
+    fetch("http://localhost:5000/api/products")
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.log("Product fetch error:", err));
@@ -146,7 +146,8 @@ placeholder="Search products..."
         </div>
 <button
   onClick={() => {
-    localStorage.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   }}
   style={{

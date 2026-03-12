@@ -17,7 +17,7 @@ router.get("/products/:id", async (req, res) => {
     return res.status(404).json({ message: "Product not found" });
   }
 
-  res.json(products);
+  res.json(product);
 });
 
 export default router;

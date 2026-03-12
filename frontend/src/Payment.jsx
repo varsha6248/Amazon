@@ -41,7 +41,7 @@ const Payment = () => {
     ];
 
     try {
-      const response = await fetch("https://amazon-backend-glih.onrender.com/orders", {
+      const response = await fetch("http://localhost:5000/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
