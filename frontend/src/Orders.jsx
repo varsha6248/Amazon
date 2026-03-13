@@ -71,24 +71,35 @@ const Orders = () => {
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
             }}
           >
-            <div style={{ marginBottom: "15px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
-              <h3 style={{ margin: 0 }}>Order ID: {order._id}</h3>
-              <p style={{ margin: "8px 0" }}>
-                <b>Total Amount:</b> ₹{order.totalAmount}
-              </p>
-              <p style={{ margin: "8px 0" }}>
-                <b>Address:</b> {order.address || "Not available"}
-              </p>
-              <p style={{ margin: "8px 0" }}>
-                <b>Order Type:</b> {order.orderType || "Home Delivery"}
-              </p>
-              <p style={{ margin: "8px 0" }}>
-                <b>Delivery Time:</b> {order.deliveryTime || "Not available"}
-              </p>
-              <p style={{ margin: "8px 0" }}>
-                <b>Ordered On:</b> {order.date || new Date(order.createdAt).toLocaleString()}
-              </p>
-            </div>
+<div
+  style={{
+    marginBottom: "15px",
+    borderBottom: "1px solid #ddd",
+    paddingBottom: "10px"
+  }}
+>
+  <h3 style={{ margin: 0 }}>Order ID: {order._id}</h3>
+
+  <p style={{ margin: "8px 0" }}>
+    <b>Total Amount:</b> ₹{order.totalAmount}
+  </p>
+
+  <p style={{ margin: "8px 0" }}>
+    <b>Address:</b> {order.address}
+  </p>
+
+  <p style={{ margin: "8px 0" }}>
+    <b>Order Type:</b> {order.orderType}
+  </p>
+
+  <p style={{ margin: "8px 0" }}>
+    <b>Delivery Time:</b> {order.deliveryTime}
+  </p>
+
+  <p style={{ margin: "8px 0" }}>
+    <b>Ordered On:</b> {order.date || new Date(order.createdAt).toLocaleString()}
+  </p>
+</div>
 
             {order.items && order.items.length > 0 ? (
               order.items.map((item, index) => (
