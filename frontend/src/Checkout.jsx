@@ -8,6 +8,8 @@ const Checkout = () => {
   const initialPrice =
     Number(params.get("price")) || Number(localStorage.getItem("cartPrice")) || 0;
 
+  const latestProduct = JSON.parse(localStorage.getItem("latestProduct") || "null");
+
   const [price, setPrice] = useState(initialPrice);
   const [showInput, setShowInput] = useState(false);
   const [offer, setOffer] = useState("");
@@ -15,28 +17,34 @@ const Checkout = () => {
   const [orderType, setOrderType] = useState("Home Delivery");
 
   useEffect(() => {
-    const latestProduct = localStorage.getItem("latestProduct");
     if (!latestProduct) {
       alert("No product selected. Please click Buy Now from a product page.");
       navigate("/home");
     }
-  }, [navigate]);
+  }, [latestProduct, navigate]);
 
   const minimumPrice = initialPrice - 150;
 
-  const handleBargain = () => setShowInput(true);
+  const handleBargain = () => {
+    setShowInput(true);
+  };
 
   const submitOffer = () => {
     const offerValue = Number(offer);
 
-    if (offerValue >= minimumPrice && offerValue <= price) {
+    if (!offer || offerValue <= 0) {
+      alert("Please enter a valid offer.");
+      return;
+    }
+
+    if (offerValue >= minimumPrice && offerValue <= initialPrice) {
       setPrice(offerValue);
       alert("Bargain accepted!");
       setShowInput(false);
     } else if (offerValue < minimumPrice) {
       alert(`Offer too low. Minimum acceptable price is ₹${minimumPrice}`);
     } else {
-      alert("Invalid offer");
+      alert("Offer cannot be greater than original price.");
     }
   };
 
@@ -69,7 +77,29 @@ const Checkout = () => {
     <div style={{ fontFamily: "Arial", padding: "30px" }}>
       <h1>Checkout</h1>
 
-      <div style={{ border: "1px solid #ccc", padding: "20px", width: "400px" }}>
+      {latestProduct && (
+        <div
+          style={{
+            border: "1px solid #ccc",
+            padding: "20px",
+            width: "450px",
+            marginBottom: "20px"
+          }}
+        >
+          <h3>Selected Product</h3>
+          <img
+            src={latestProduct.image}
+            alt={latestProduct.title}
+            style={{ width: "180px", borderRadius: "10px", marginBottom: "10px" }}
+          />
+          <p><b>Product:</b> {latestProduct.title}</p>
+          <p><b>Quantity:</b> {latestProduct.quantity || 1}</p>
+          <p><b>Original Price:</b> ₹{initialPrice}</p>
+          <p><b>Final Payable:</b> ₹{price}</p>
+        </div>
+      )}
+
+      <div style={{ border: "1px solid #ccc", padding: "20px", width: "450px" }}>
         <h3>Price Details</h3>
 
         <p>Original Price: ₹{initialPrice}</p>

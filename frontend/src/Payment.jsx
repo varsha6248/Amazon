@@ -3,18 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 const Payment = () => {
   const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const checkoutData = JSON.parse(localStorage.getItem("checkoutData")) || {};
+  const latestProduct = JSON.parse(localStorage.getItem("latestProduct") || "null");
   const amount = Number(localStorage.getItem("cartPrice")) || 0;
 
   const placeOrder = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const checkoutData = JSON.parse(localStorage.getItem("checkoutData")) || {};
-    const latestProduct = JSON.parse(localStorage.getItem("latestProduct") || "null");
-
-    console.log("user =", user);
-    console.log("checkoutData =", checkoutData);
-    console.log("latestProduct =", latestProduct);
-    console.log("amount =", amount);
-
     if (!user?.email) {
       alert("User not found. Please login again.");
       return;
@@ -25,14 +20,14 @@ const Payment = () => {
       return;
     }
 
-    if (amount <= 0) {
-      alert("Invalid order amount.");
+    if (!checkoutData.address) {
+      alert("Checkout details are missing.");
       return;
     }
 
     const orderItems = [
       {
-        productId: latestProduct.id,
+        productId: latestProduct.id || latestProduct._id,
         title: latestProduct.title,
         price: latestProduct.price,
         image: latestProduct.image,
@@ -50,10 +45,10 @@ const Payment = () => {
           userEmail: user.email,
           items: orderItems,
           totalAmount: amount,
-          address: checkoutData.address || "",
-          orderType: checkoutData.orderType || "Home Delivery",
-          deliveryTime: checkoutData.deliveryTime || "",
-          date: checkoutData.date || new Date().toLocaleString()
+          address: checkoutData.address,
+          orderType: checkoutData.orderType,
+          deliveryTime: checkoutData.deliveryTime,
+          date: checkoutData.date
         })
       });
 
@@ -76,14 +71,42 @@ const Payment = () => {
     }
   };
 
+  if (!latestProduct) {
+    return <h2 style={{ padding: "20px" }}>No product selected</h2>;
+  }
+
   return (
     <div style={{ fontFamily: "Arial", padding: "30px", textAlign: "center" }}>
       <h1>Payment via UPI</h1>
-      <p>Total Amount: ₹{amount}</p>
+
+      <div
+        style={{
+          maxWidth: "500px",
+          margin: "0 auto 20px auto",
+          border: "1px solid #ddd",
+          padding: "20px",
+          borderRadius: "10px",
+          textAlign: "left"
+        }}
+      >
+        <h2>Order Summary</h2>
+        <img
+          src={latestProduct.image}
+          alt={latestProduct.title}
+          style={{ width: "180px", borderRadius: "10px", marginBottom: "10px" }}
+        />
+        <p><b>Product:</b> {latestProduct.title}</p>
+        <p><b>Quantity:</b> {latestProduct.quantity || 1}</p>
+        <p><b>Final Amount:</b> ₹{amount}</p>
+        <p><b>Address:</b> {checkoutData.address}</p>
+        <p><b>Order Type:</b> {checkoutData.orderType}</p>
+        <p><b>Delivery Time:</b> {checkoutData.deliveryTime}</p>
+        <p><b>Date:</b> {checkoutData.date}</p>
+      </div>
 
       <p>
         Please scan the QR code below with your UPI app (Google Pay, PhonePe, PayTM, etc.)
-        to pay directly to my account.
+        to pay directly.
       </p>
 
       <img
@@ -92,7 +115,7 @@ const Payment = () => {
         style={{ width: "250px", height: "250px", margin: "20px 0" }}
       />
 
-      <p>After payment, please take a screenshot and click "I Paid".</p>
+      <p>After payment, please click "I Paid".</p>
 
       <button
         onClick={placeOrder}
