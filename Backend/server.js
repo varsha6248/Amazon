@@ -162,7 +162,15 @@ app.delete("/users", async (req, res) => {
 
 app.post("/orders", async (req, res) => {
   try {
-    const { userEmail, items, totalAmount } = req.body;
+    const {
+      userEmail,
+      items,
+      totalAmount,
+      address,
+      orderType,
+      deliveryTime,
+      date,
+    } = req.body;
 
     if (
       !userEmail ||
@@ -178,6 +186,10 @@ app.post("/orders", async (req, res) => {
       userEmail,
       items,
       totalAmount,
+      address,
+      orderType,
+      deliveryTime,
+      date,
     });
 
     await newOrder.save();
